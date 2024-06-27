@@ -185,6 +185,12 @@ async function run() {
       const data = await facultyCollection.find().toArray();
       res.send(data);
     })
+    app.get('/singleFaculty/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const data = await facultyCollection.findOne(query)
+      res.send(data);
+    })
 
     app.delete('/faculty/:id', async (req, res) => {
       const id = req.params.id;
@@ -193,6 +199,19 @@ async function run() {
       res.send(result);
     })
 
+    app.put('/updateFaculty/:id', async (req, res) => {
+      const data = req.body
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true }
+      const updatedInfo = {
+        $set: {
+          ...data
+        }
+      }
+      const result = await facultyCollection.updateOne(query, updatedInfo, options);
+      res.send(result);
+    })
     // testimonial api 
     app.post('/testimonial', async (req, res) => {
       const info = req.body;
