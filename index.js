@@ -204,6 +204,12 @@ async function run() {
       const result = await testimonialCollection.find().toArray();
       res.send(result);
     })
+    app.get('/singleTestimonial/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }; 
+      const result = await testimonialCollection.findOne(query)
+      res.send(result);
+    })
 
     app.delete('/testimonial/:id', async (req, res) => {
       const id = req.params.id;
@@ -212,6 +218,19 @@ async function run() {
       res.send(result);
     })
 
+    app.put('/updateTestimonials/:id', async (req, res) => {
+      const data = req.body
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true }
+      const updatedInfo = {
+        $set: {
+          ...data
+        }
+      }
+      const result = await testimonialCollection.updateOne(query, updatedInfo, options);
+      res.send(result);
+    })
     // home page api 
 
     app.get('/homepageContent', async (req, res) => {
