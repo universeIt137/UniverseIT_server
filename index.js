@@ -185,6 +185,12 @@ async function run() {
       const data = await facultyCollection.find().toArray();
       res.send(data);
     })
+    app.get('/singleFaculty/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const data = await facultyCollection.findOne(query)
+      res.send(data);
+    })
 
     app.delete('/faculty/:id', async (req, res) => {
       const id = req.params.id;
@@ -193,6 +199,19 @@ async function run() {
       res.send(result);
     })
 
+    app.put('/updateFaculty/:id', async (req, res) => {
+      const data = req.body
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true }
+      const updatedInfo = {
+        $set: {
+          ...data
+        }
+      }
+      const result = await facultyCollection.updateOne(query, updatedInfo, options);
+      res.send(result);
+    })
     // testimonial api 
     app.post('/testimonial', async (req, res) => {
       const info = req.body;
@@ -204,6 +223,12 @@ async function run() {
       const result = await testimonialCollection.find().toArray();
       res.send(result);
     })
+    app.get('/singleTestimonial/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }; 
+      const result = await testimonialCollection.findOne(query)
+      res.send(result);
+    })
 
     app.delete('/testimonial/:id', async (req, res) => {
       const id = req.params.id;
@@ -212,6 +237,19 @@ async function run() {
       res.send(result);
     })
 
+    app.put('/updateTestimonials/:id', async (req, res) => {
+      const data = req.body
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true }
+      const updatedInfo = {
+        $set: {
+          ...data
+        }
+      }
+      const result = await testimonialCollection.updateOne(query, updatedInfo, options);
+      res.send(result);
+    })
     // home page api 
 
     app.get('/homepageContent', async (req, res) => {
