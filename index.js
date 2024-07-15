@@ -3,12 +3,14 @@ const app = express();
 const cors = require('cors');
 require('dotenv').config();
 const port = process.env.PORT || 5000;
+const bcrypt = require('bcrypt');
 
 
 // middleware
 
 app.use(cors());
 app.use(express.json());
+
 
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -34,7 +36,46 @@ async function run() {
     const facultyCollection = client.db('BIFDT').collection('faculty');
     const testimonialCollection = client.db('BIFDT').collection('testimonial');
     const homepageContentCollection = client.db('BIFDT').collection('homepageContent');
-    //   admission api 
+    const studentGalleryCollection = client.db('BIFDT').collection('studentGallery');
+    const categoryCollection = client.db('BIFDT').collection('category');
+    const commentCollection = client.db('BIFDT').collection('comment');
+    const courseCollection = client.db('BIFDT').collection('course');
+    const usersCollection = client.db('BIFDT').collection('users');
+
+
+
+
+    //1. seminar api
+
+    app.post('/seminar', async (req, res) => {
+      const seminar = req.body;
+      const result = await seminarCollection.insertOne(seminar);
+      res.send(result);
+    })
+
+    app.get('/seminar', async (req, res) => {
+      const result = await seminarCollection.find().toArray();
+      res.send(result);
+    })
+
+
+
+    app.get('/seminar/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await seminarCollection.findOne(query);
+      res.send(result);
+    })
+
+    app.delete('/seminar/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await seminarCollection.deleteOne(query);
+      res.send(result);
+    })
+
+
+    //2.   admission api
 
     app.post('/admission', async (req, res) => {
       const admissionRequest = req.body;
@@ -69,69 +110,8 @@ async function run() {
     })
 
 
-    // seminar api
 
-    app.post('/seminar', async (req, res) => {
-      const seminar = req.body;
-      const result = await seminarCollection.insertOne(seminar);
-      res.send(result);
-    })
-
-    app.get('/seminar', async (req, res) => {
-      const result = await seminarCollection.find().toArray();
-      res.send(result);
-    })
-
-    app.delete('/seminar/:id', async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await seminarCollection.deleteOne(query);
-      res.send(result);
-    })
-
-    app.get('/seminar/:id', async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await seminarCollection.findOne(query);
-      res.send(result);
-    })
-
-    //   seminar reqeust api
-
-    app.post('/seminarRequest', async (req, res) => {
-      const seminarRequest = req.body;
-      const result = await seminarRequestCollection.insertOne(seminarRequest);
-      res.send(result);
-    })
-
-    app.get('/seminarRequest', async (req, res) => {
-      const result = await seminarRequestCollection.find().toArray();
-      res.send(result);
-    })
-
-    app.delete('/seminarRequest/:id', async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) }
-      const result = await seminarRequestCollection.deleteOne(query);
-      res.send(result);
-    })
-
-    app.patch('/seminarRequest/:id', async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
-      const updatedDoc = {
-        $set: {
-          status: 'confirmed'
-        }
-      }
-
-      const result = await seminarRequestCollection.updateOne(filter, updatedDoc);
-      res.send(result);
-    })
-
-
-
-    //   blog api
+    //3.   blog api
 
     app.post('/blog', async (req, res) => {
       const blog = req.body;
@@ -157,7 +137,7 @@ async function run() {
       const result = await blogCollection.deleteOne(query);
       res.send(result);
     })
-    
+
     app.put('/updateBlog/:id', async (req, res) => {
       const data = req.body
       const id = req.params.id;
@@ -172,7 +152,9 @@ async function run() {
       res.send(result);
     })
 
-    // Faculty api
+
+
+    //4. Faculty api
 
     app.post('/faculty', async (req, res) => {
       const info = req.body;
@@ -212,7 +194,11 @@ async function run() {
       const result = await facultyCollection.updateOne(query, updatedInfo, options);
       res.send(result);
     })
-    // testimonial api 
+
+
+
+
+    //5. testimonial api 
     app.post('/testimonial', async (req, res) => {
       const info = req.body;
       const result = await testimonialCollection.insertOne(info);
@@ -223,12 +209,6 @@ async function run() {
       const result = await testimonialCollection.find().toArray();
       res.send(result);
     })
-    app.get('/singleTestimonial/:id', async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) }; 
-      const result = await testimonialCollection.findOne(query)
-      res.send(result);
-    })
 
     app.delete('/testimonial/:id', async (req, res) => {
       const id = req.params.id;
@@ -237,7 +217,17 @@ async function run() {
       res.send(result);
     })
 
-    app.put('/updateTestimonials/:id', async (req, res) => {
+
+    app.get('/singleTestimonial/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await testimonialCollection.findOne(query)
+      res.send(result);
+    })
+
+
+
+    app.put('/updateTestimonial/:id', async (req, res) => {
       const data = req.body
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -250,12 +240,51 @@ async function run() {
       const result = await testimonialCollection.updateOne(query, updatedInfo, options);
       res.send(result);
     })
-    // home page api 
 
-    app.get('/homepageContent', async (req, res) => {
-      const result = await homepageContentCollection.find().toArray();
-      res.send(result)
+
+
+
+    //6.   seminar reqeust api
+
+    app.post('/seminarRequest', async (req, res) => {
+      const seminarRequest = req.body;
+      const result = await seminarRequestCollection.insertOne(seminarRequest);
+      res.send(result);
     })
+
+    app.get('/seminarRequest', async (req, res) => {
+      const result = await seminarRequestCollection.find().toArray();
+      res.send(result);
+    })
+
+    app.delete('/seminarRequest/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await seminarRequestCollection.deleteOne(query);
+      res.send(result);
+    })
+
+    app.put('/seminarRequest/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          status: 'confirmed'
+        }
+      }
+
+      const result = await seminarRequestCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    })
+
+
+
+
+
+
+
+
+    //7. home page api 
 
     app.post('/updateHomepageContent/:id', async (req, res) => {
       const data = req.body;
@@ -276,6 +305,278 @@ async function run() {
       }
 
     })
+
+    app.get('/homepageContent', async (req, res) => {
+      const result = await homepageContentCollection.find().toArray();
+      res.send(result)
+    })
+
+
+    //8. student gallery api
+
+    // create category 
+    app.post('/addCategory', async (req, res) => {
+      const data = req.body;
+      const result = await categoryCollection.insertOne(data);
+      res.send(result);
+    })
+
+    // get all category
+
+    app.get('/allCategory', async (req, res) => {
+      const result = await categoryCollection.find().toArray();
+      res.send(result);
+    })
+
+    // update a single Category 
+    app.put('/updateCategory/:id', async (req, res) => {
+      const data = req.body;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true }
+      const updatedInfo = {
+        $set: {
+          ...data
+        }
+      }
+      const result = await categoryCollection.updateOne(query, updatedInfo, options);
+      res.send(result);
+    })
+
+    // delete a single category
+    app.delete('/deleteCategory/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await categoryCollection.deleteOne(query);
+      res.send(result);
+    })
+
+    // get one category 
+    app.get('/category/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await categoryCollection.findOne(query);
+      res.send(result);
+    })
+
+
+    // photo related apis
+
+    // Add image to gallary 
+    app.post('/addImage', async (req, res) => {
+      const { category_id, image_url } = req.body;
+      const imageData = {
+        category_id: new ObjectId(category_id),
+        image_url
+      };
+
+      const result = await studentGalleryCollection.insertOne(imageData);
+      res.send(result);
+    })
+
+    // Get all images for a category 
+    app.get('/imagesByCategory/:id', async (req, res) => {
+      const category_id = req.params.id;
+      const query = { category_id: new ObjectId(category_id) };
+
+      const result = await studentGalleryCollection.find(query).toArray();
+      res.send(result);
+    })
+
+
+    // student gallary
+
+    app.post('/studentGallery', async (req, res) => {
+      const info = req.body;
+      const result = await studentGalleryCollection.insertOne(info);
+      res.send(result);
+    })
+
+    app.get('/studentGallery', async (req, res) => {
+      const result = await studentGalleryCollection.find().toArray();
+      res.send(result);
+    })
+    app.get('/singleStudentGallery/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await studentGalleryCollection.findOne(query)
+      res.send(result);
+    })
+
+    app.delete('/studentGallery/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await studentGalleryCollection.deleteOne(query);
+      res.send(result);
+    })
+
+    app.put('/updateStudentGallery/:id', async (req, res) => {
+      const data = req.body
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true }
+      const updatedInfo = {
+        $set: {
+          ...data
+        }
+      }
+      const result = await studentGalleryCollection.updateOne(query, updatedInfo, options);
+      res.send(result);
+    })
+
+    // 9. Comment api
+
+    // post a comment 
+    app.post('/comments', async (req, res) => {
+      const comment = req.body;
+      const result = await commentCollection.insertOne(comment);
+      res.send(result);
+    })
+
+    // get all comment 
+    app.get('/comments', async (req, res) => {
+      const result = await commentCollection.find().toArray();
+      res.send(result);
+    })
+
+    // get a comment 
+    app.get('/comments/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await commentCollection.findOne(query);
+      res.send(result);
+    })
+
+
+    // delete a comment 
+    app.delete('/comments/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await commentCollection.deleteOne(query);
+      res.send(result);
+    })
+
+    // update a comment 
+    app.put('/comments/:id', async (req, res) => {
+      const data = req.body;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedInfo = {
+        $set: {
+          ...data
+        }
+      }
+
+      const result = await commentCollection.updateOne(query, updatedInfo, options);
+      res.send(result);
+    })
+
+
+    // Get comments for a specific blog
+    app.get('/comments/blog/:blogId', async (req, res) => {
+      const myblogId = req.params.blogId;
+      const query = { blogId:  myblogId, isShow: true}; // assuming blogId is stored as an ObjectId
+      const result = await commentCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // 10. Course api
+
+    // post a course 
+    app.post('/course', async (req, res) => {
+      const course = req.body;
+      const result = await courseCollection.insertOne(course);
+      res.send(result);
+    })
+
+    // get all course 
+    app.get('/course', async (req, res) => {
+      const result = await courseCollection.find().toArray();
+      res.send(result);
+    })
+
+    // get a single course 
+    app.get('/course/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await courseCollection.findOne(query);
+      res.send(result);
+    })
+
+    // delete a course 
+    app.delete('/course/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await courseCollection.deleteOne(query);
+      res.send(result);
+    })
+
+    // update a course 
+    app.put('/course/:id', async (req, res) => {
+      const data = req.body;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedInfo = {
+        $set: {
+          ...data
+        }
+      }
+
+      const result = await courseCollection.updateOne(query, updatedInfo, options);
+      res.send(result);
+    })
+
+    // 11. User Related api
+
+    app.post('/register', async (req, res) => {
+      const { name, phone, password } = req.body;
+
+      const user = {
+        name,
+        phone,
+        password
+      };
+
+      const result = await usersCollection.insertOne(user);
+      res.send(result);
+    })
+
+    app.post('/login', async (req, res) => {
+      const user = req.body;
+
+      const query = { phone: user.phone };
+
+      const existingUser = await usersCollection.findOne(query);
+
+
+
+      if (existingUser.password == user.password) {
+        return res.send({ message: 'login successful', insertedId: 2 });
+      }
+
+      return res.send('user not found');
+
+
+
+
+
+    })
+
+    app.get('/users', async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      res.send(result);
+    })
+
+    app.delete('/users/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await usersCollection.deleteOne(query);
+      res.send(result);
+    })
+
+
 
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
