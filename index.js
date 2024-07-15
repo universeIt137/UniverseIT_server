@@ -42,6 +42,7 @@ async function run() {
     const courseCollection = client.db('BIFDT').collection('course');
     const courseCategoryCollection = client.db('BIFDT').collection('courseCategory');
     const semesterCollection = client.db('BIFDT').collection('semester');
+    const objectiveCollection = client.db('BIFDT').collection('courseObjective');
     
     const usersCollection = client.db('BIFDT').collection('users');
 
@@ -679,6 +680,56 @@ async function run() {
       const myCourseId = req.params.id;
       const query = { courseId: myCourseId };
       const result = await semesterCollection.find(query).toArray();
+      res.send(result);
+    })
+
+    // 13. Course Objective related api
+
+    app.post('/objectives', async (req, res) => {
+      const data = req.body;
+      const result = await objectiveCollection.insertOne(data);
+      res.send(result);
+    })
+
+    app.get('/objectives', async (req, res) => {
+      const result = await objectiveCollection.find().toArray();
+      res.send(result);
+    })
+
+    app.get('/objectives/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await objectiveCollection.findOne(query);
+      res.send(result);
+    })
+
+    
+    app.delete('/objectives/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await objectiveCollection.deleteOne(query);
+      res.send(result);
+    })
+
+    app.put('/objectives/:id', async (req, res) => {
+      const data = req.body;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedInfo = {
+        $set: {
+          ...data
+        }
+      }
+
+      const result = await objectiveCollection.updateOne(query, updatedInfo, options);
+      res.send(result);
+    })
+
+    app.get('/objectives/course/:id', async (req, res) => {
+      const myCourseId = req.params.id;
+      const query = { courseId: myCourseId };
+      const result = await objectiveCollection.find(query).toArray();
       res.send(result);
     })
 
