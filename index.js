@@ -40,6 +40,8 @@ async function run() {
     const categoryCollection = client.db('BIFDT').collection('category');
     const commentCollection = client.db('BIFDT').collection('comment');
     const courseCollection = client.db('BIFDT').collection('course');
+    const courseCategoryCollection = client.db('BIFDT').collection('courseCategory');
+    
     const usersCollection = client.db('BIFDT').collection('users');
 
 
@@ -228,7 +230,7 @@ async function run() {
 
 
     app.put('/updateTestimonial/:id', async (req, res) => {
-      const data = req.body
+      const data = req.body;
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const options = { upsert: true }
@@ -574,6 +576,57 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await usersCollection.deleteOne(query);
       res.send(result);
+    })
+
+
+    //11. course category api 
+    app.post('/courseCategory', async (req, res) => {
+      const data = req.body;
+      const result = await courseCategoryCollection.insertOne(data);
+      res.send(result);
+    })
+
+    app.get('/courseCategory', async (req, res) => {
+      const result = await courseCategoryCollection.find().toArray();
+      res.send(result);
+    })
+
+    app.get('/courseCategory/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await courseCategoryCollection.findOne(query);
+      res.send(result);
+    })
+
+    app.delete('/courseCategory/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await courseCategoryCollection.deleteOne(query);
+      res.send(result);
+    })
+
+    app.put('/courseCategory/:id', async (req, res) => {
+      const data = req.body;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedInfo = {
+        $set:{
+          ...data
+        }
+      }
+
+      const result = await courseCategoryCollection.updateOne(query, updatedInfo, options);
+      res.send(result);
+
+    })
+
+    app.get('/courseCategory/course/:id', async (req, res) => {
+      const myCourseId = req.params.id;
+      const query = { courseId: myCourseId };
+      const result = await courseCategoryCollection.find(query).toArray();
+      res.send(result);
+
     })
 
 
