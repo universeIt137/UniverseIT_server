@@ -41,6 +41,7 @@ async function run() {
     const commentCollection = client.db('BIFDT').collection('comment');
     const courseCollection = client.db('BIFDT').collection('course');
     const courseCategoryCollection = client.db('BIFDT').collection('courseCategory');
+    const semesterCollection = client.db('BIFDT').collection('semester');
     
     const usersCollection = client.db('BIFDT').collection('users');
 
@@ -629,6 +630,57 @@ async function run() {
 
     })
 
+
+    // 12. semester Category api
+
+    app.post('/semesterByCourse', async (req, res) => {
+      const data = req.body;
+      const result = await semesterCollection.insertOne(data);
+      res.send(result);
+    })
+
+    app.get('/semesterByCourse', async (req, res) => {
+      const result = await semesterCollection.find().toArray();
+      res.send(result);
+    })
+
+
+    app.get('/semesterByCourse/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await semesterCollection.findOne(query);
+      res.send(result);
+    })
+
+    app.delete('/semesterByCourse/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await semesterCollection.deleteOne(query);
+      res.send(result);
+    })
+
+
+    app.put('/semesterByCourse/:id', async (req, res) => {
+      const data = req.body;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedInfo = {
+        $set: {
+          ...data
+        }
+      }
+
+      const result = await semesterCollection.updateOne(query, updatedInfo, options);
+      res.send(result);
+    })
+
+    app.get('/semesterByCourse/course/:id', async (req, res) => {
+      const myCourseId = req.params.id;
+      const query = { courseId: myCourseId };
+      const result = await semesterCollection.find(query).toArray();
+      res.send(result);
+    })
 
 
     // Send a ping to confirm a successful connection
