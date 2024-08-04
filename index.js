@@ -14,7 +14,10 @@ app.use(express.json());
 
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bpilnp1.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+console.log(`${process.env.DB_USER}`);
+// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bpilnp1.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster1.olinusx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -28,23 +31,23 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    // await client.connect();
-    const admissionCollection = client.db('BIFDT').collection('admission');
-    const seminarCollection = client.db('BIFDT').collection('seminar');
-    const seminarRequestCollection = client.db('BIFDT').collection('seminarRequest');
-    const blogCollection = client.db('BIFDT').collection('blog');
-    const facultyCollection = client.db('BIFDT').collection('faculty');
-    const testimonialCollection = client.db('BIFDT').collection('testimonial');
-    const homepageContentCollection = client.db('BIFDT').collection('homepageContent');
-    const studentGalleryCollection = client.db('BIFDT').collection('studentGallery');
-    const categoryCollection = client.db('BIFDT').collection('category');
-    const commentCollection = client.db('BIFDT').collection('comment');
-    const courseCollection = client.db('BIFDT').collection('course');
-    const courseCategoryCollection = client.db('BIFDT').collection('courseCategory');
-    const semesterCollection = client.db('BIFDT').collection('semester');
-    const objectiveCollection = client.db('BIFDT').collection('courseObjective');
+    await client.connect();
+    const admissionCollection = client.db('UNIVERSE_IT').collection('admission');
+    const seminarCollection = client.db('UNIVERSE_IT').collection('seminar');
+    const seminarRequestCollection = client.db('UNIVERSE_IT').collection('seminarRequest');
+    const blogCollection = client.db('UNIVERSE_IT').collection('blog');
+    const facultyCollection = client.db('UNIVERSE_IT').collection('faculty');
+    const testimonialCollection = client.db('UNIVERSE_IT').collection('testimonial');
+    const homepageContentCollection = client.db('UNIVERSE_IT').collection('homepageContent');
+    const studentGalleryCollection = client.db('UNIVERSE_IT').collection('studentGallery');
+    const categoryCollection = client.db('UNIVERSE_IT').collection('category');
+    const commentCollection = client.db('UNIVERSE_IT').collection('comment');
+    const courseCollection = client.db('UNIVERSE_IT').collection('course');
+    const courseCategoryCollection = client.db('UNIVERSE_IT').collection('courseCategory');
+    const semesterCollection = client.db('UNIVERSE_IT').collection('semester');
+    const objectiveCollection = client.db('UNIVERSE_IT').collection('courseObjective');
     
-    const usersCollection = client.db('BIFDT').collection('users');
+    const usersCollection = client.db('UNIVERSE_IT').collection('users');
 
 
 
@@ -735,8 +738,8 @@ async function run() {
 
 
     // Send a ping to confirm a successful connection
-    // await client.db("admin").command({ ping: 1 });
-    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    await client.db("admin").command({ ping: 1 });
+    console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
