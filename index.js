@@ -14,7 +14,9 @@ app.use(express.json());
 
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bpilnp1.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bpilnp1.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster1.olinusx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -29,22 +31,26 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
-    const admissionCollection = client.db('BIFDT').collection('admission');
-    const seminarCollection = client.db('BIFDT').collection('seminar');
-    const seminarRequestCollection = client.db('BIFDT').collection('seminarRequest');
-    const blogCollection = client.db('BIFDT').collection('blog');
-    const facultyCollection = client.db('BIFDT').collection('faculty');
-    const testimonialCollection = client.db('BIFDT').collection('testimonial');
-    const homepageContentCollection = client.db('BIFDT').collection('homepageContent');
-    const studentGalleryCollection = client.db('BIFDT').collection('studentGallery');
-    const categoryCollection = client.db('BIFDT').collection('category');
-    const commentCollection = client.db('BIFDT').collection('comment');
-    const courseCollection = client.db('BIFDT').collection('course');
-    const courseCategoryCollection = client.db('BIFDT').collection('courseCategory');
-    const semesterCollection = client.db('BIFDT').collection('semester');
-    const objectiveCollection = client.db('BIFDT').collection('courseObjective');
+    const admissionCollection = client.db('UNIVERSE_IT').collection('admission');
+    const seminarCollection = client.db('UNIVERSE_IT').collection('seminar');
+    const seminarRequestCollection = client.db('UNIVERSE_IT').collection('seminarRequest');
+    const blogCollection = client.db('UNIVERSE_IT').collection('blog');
+    const facultyCollection = client.db('UNIVERSE_IT').collection('faculty');
+    const testimonialCollection = client.db('UNIVERSE_IT').collection('testimonial');
+    const homepageContentCollection = client.db('UNIVERSE_IT').collection('homepageContent');
+    const studentGalleryCollection = client.db('UNIVERSE_IT').collection('studentGallery');
+    const categoryCollection = client.db('UNIVERSE_IT').collection('category');
+    const commentCollection = client.db('UNIVERSE_IT').collection('comment');
+    const courseCollection = client.db('UNIVERSE_IT').collection('course');
+    const courseCategoryCollection = client.db('UNIVERSE_IT').collection('courseCategory');
+    const semesterCollection = client.db('UNIVERSE_IT').collection('semester');
+    const objectiveCollection = client.db('UNIVERSE_IT').collection('courseObjective');
     
-    const usersCollection = client.db('BIFDT').collection('users');
+    const usersCollection = client.db('UNIVERSE_IT').collection('users');
+
+    const certificateCollection = client.db('UNIVERSE_IT').collection('certificate');
+    const successCollection = client.db('UNIVERSE_IT').collection('success');
+    const teamCollection = client.db('UNIVERSE_IT').collection('team');
 
 
 
@@ -534,6 +540,8 @@ async function run() {
 
     // 11. User Related api
 
+   
+
     app.post('/register', async (req, res) => {
       const { name, phone, password } = req.body;
 
@@ -549,27 +557,37 @@ async function run() {
 
     app.post('/login', async (req, res) => {
       const user = req.body;
+      console.log(user.phone);
 
       const query = { phone: user.phone };
 
       const existingUser = await usersCollection.findOne(query);
+      console.log(existingUser);
 
-
-
-      if (existingUser.password == user.password) {
-        return res.send({ message: 'login successful', insertedId: 2 });
+      if (existingUser) {
+        if (existingUser.phone == user.phone) {
+          return res.send({ message: 'login successful', insertedId: 2 });
+        }
+      } else {
+        return res.send('user not found');
       }
 
-      return res.send('user not found');
 
+      
 
-
-
+      
 
     })
 
     app.get('/users', async (req, res) => {
       const result = await usersCollection.find().toArray();
+      res.send(result);
+    })
+
+    app.get('/users/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await usersCollection.findOne(query);
       res.send(result);
     })
 
@@ -734,6 +752,149 @@ async function run() {
     })
 
 
+    // 14. certificate valiadition 
+    app.post('/certificate', async (req, res) => {
+      const certificate = req.body;
+      const result = await certificateCollection.insertOne(certificate);
+      res.send(result);
+    })
+
+    app.get('/certificate', async (req, res) => {
+      const cursor = certificateCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    })
+
+    app.post('/certificateSerial', async (req, res) => {
+      const data = req.body;
+      const serial = data.serial;
+      const query = { certificateNumber: serial };
+      const result = await certificateCollection.findOne(query);
+      res.send(result);
+    })
+
+    app.get('/certificate/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await certificateCollection.findOne(query);
+      res.send(result);
+    })
+
+    app.delete('/certificate/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await certificateCollection.deleteOne(query);
+      res.send(result);
+    })
+
+
+    app.put('/certificate/:id', async (req, res) => {
+      const data = req.body;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedInfo = {
+        $set: {
+          ...data
+        }
+      }
+
+      const result = await certificateCollection.updateOne(query, updatedInfo, options);
+      res.send(result);
+    })
+
+
+    // 15. success story 
+    app.post('/successStory', async (req, res) => {
+      const video = req.body;
+      const result = await successCollection.insertOne(video);
+      res.send(result);
+    })
+
+    app.get('/successStory', async (req, res) => {
+      const cursor = successCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    })
+
+    app.get('/successStory/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await successCollection.findOne(query);
+      res.send(result);
+    })
+
+    app.put('/successStory/:id', async (req, res) => {
+      const data = req.body;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedInfo = {
+        $set: {
+          ...data
+        }
+      }
+
+      const result = await successCollection.updateOne(query, updatedInfo, options);
+      res.send(result);
+    })
+
+    app.delete('/successStory/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await successCollection.deleteOne(query);
+      res.send(result);
+    })
+
+
+    // 16. Team related api
+    // post a member 
+    app.post('/team-member', async (req, res) => {
+      const member = req.body;
+      const result = await teamCollection.insertOne(member);
+      res.send(result);
+    })
+
+    // get all team-member 
+    app.get("/team-member", async (req, res) => {
+      const result = await teamCollection.find().toArray();
+      res.send(result);
+    })
+
+    // get a single team-member 
+    app.get('/team-member/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await teamCollection.findOne(query);
+      res.send(result);
+    })
+
+    // delete a member 
+    app.delete('/team-member/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await teamCollection.deleteOne(query);
+      res.send(result);
+    })
+
+    // update a member
+    app.put('/team-member/:id', async (req, res) => {
+      const data = req.body;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedInfo = {
+        $set: {
+          ...data
+        }
+      }
+
+      const result = await teamCollection.updateOne(query, updatedInfo, options);
+      res.send(result);
+    })
+
+
+
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     // console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -743,7 +904,6 @@ async function run() {
   }
 }
 run().catch(console.dir);
-
 
 
 app.get('/', (req, res) => {
