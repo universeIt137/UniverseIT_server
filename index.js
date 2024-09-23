@@ -51,6 +51,7 @@ async function run() {
     const certificateCollection = client.db('UNIVERSE_IT').collection('certificate');
     const successCollection = client.db('UNIVERSE_IT').collection('success');
     const teamCollection = client.db('UNIVERSE_IT').collection('team');
+    const careerCollection = client.db('UNIVERSE_IT').collection('career');
 
 
 
@@ -892,6 +893,53 @@ async function run() {
       const result = await teamCollection.updateOne(query, updatedInfo, options);
       res.send(result);
     })
+
+    // 17. Career related api 
+    // post a career 
+    app.post('/career', async (req, res) => {
+      const data = req.body;
+      const result = await careerCollection.insertOne(data);
+      res.send(result);
+    })
+
+    // get all career 
+    app.get('/career', async (req, res) => {
+      const result = await careerCollection.find().toArray();
+      res.send(result);
+    })
+
+    // get a single career 
+    app.get('/career/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await careerCollection.findOne(query);
+      res.send(result);
+    })
+
+    // delete career 
+    app.delete('/career/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await careerCollection.deleteOne(query);
+      res.send(result);
+    })
+
+    // update career 
+    app.put('/career/:id', async (req, res) => {
+      const data = req.body;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedInfo = {
+        $set: {
+          ...data
+        }
+      }
+
+      const result = await careerCollection.updateOne(query, updatedInfo, options);
+      res.send(result);
+    })
+
 
 
 
