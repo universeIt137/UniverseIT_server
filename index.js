@@ -52,6 +52,7 @@ async function run() {
     const successCollection = client.db('UNIVERSE_IT').collection('success');
     const teamCollection = client.db('UNIVERSE_IT').collection('team');
     const careerCollection = client.db('UNIVERSE_IT').collection('career');
+    const jobApplyCollection = client.db('UNIVERSE_IT').collection('jobApply');
 
 
 
@@ -940,7 +941,52 @@ async function run() {
       res.send(result);
     })
 
+    // 18. Apply job related api
 
+    // post a job application 
+    app.post('/apply-job', async (req, res) => {
+      const data = req.body;
+      const result = await jobApplyCollection.insertOne(data);
+      res.send(result);
+    })
+
+    // get all job application 
+    app.get('/apply-job', async (req, res) => {
+      const result = await jobApplyCollection.find().toArray();
+      res.send(result);
+    })
+
+    // get a single job application 
+    app.get('/apply-job/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await jobApplyCollection.findOne(query);
+      res.send(result);
+    })
+
+    // delete a job application 
+    app.delete('/apply-job/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await jobApplyCollection.deleteOne(query);
+      res.send(result);
+    })
+
+   
+    // confirm a job application 
+    app.put('/apply-job/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          status: 'confirmed'
+        }
+      }
+
+      const result = await jobApplyCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+
+    })
 
 
     // Send a ping to confirm a successful connection
