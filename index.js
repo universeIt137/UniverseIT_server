@@ -53,6 +53,7 @@ async function run() {
     const teamCollection = client.db('UNIVERSE_IT').collection('team');
     const careerCollection = client.db('UNIVERSE_IT').collection('career');
     const jobApplyCollection = client.db('UNIVERSE_IT').collection('jobApply');
+    const popularCategoryCollection = client.db('UNIVERSE_IT').collection('popularCategory');
 
 
 
@@ -988,6 +989,51 @@ async function run() {
 
     })
 
+    // 19. popular course Category Section
+    // post a category 
+    app.post('/popular-category', async (req, res) => {
+      const data = req.body;
+      const result = await popularCategoryCollection.insertOne(data);
+      res.send(result);
+    })
+
+    // get all category 
+    app.get('/popular-category', async (req, res) => {
+      const result = await popularCategoryCollection.find().toArray();
+      res.send(result);
+    })
+
+    // get single category 
+    app.get('/popular-category/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await popularCategoryCollection.findOne(query);
+      res.send(result);
+    })
+
+    // delete a category 
+    app.delete('/popular-category/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await popularCategoryCollection.deleteOne(query);
+      res.send(result);
+    })
+
+    // update a category 
+    app.put('/popular-category/:id', async (req, res) => {
+      const data = req.body;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedInfo = {
+        $set: {
+          ...data
+        }
+      }
+
+      const result = await popularCategoryCollection.updateOne(query, updatedInfo, options);
+      res.send(result);
+    })
 
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
