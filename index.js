@@ -588,7 +588,7 @@ async function run() {
       const result = await usersCollection.findOne(query);
       res.send(result);
     })
-
+// hello 
     app.delete('/users/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
