@@ -45,7 +45,7 @@ async function run() {
     const courseCategoryCollection = client.db('UNIVERSE_IT').collection('courseCategory');
     const semesterCollection = client.db('UNIVERSE_IT').collection('semester');
     const objectiveCollection = client.db('UNIVERSE_IT').collection('courseObjective');
-    
+
     const usersCollection = client.db('UNIVERSE_IT').collection('users');
 
     const certificateCollection = client.db('UNIVERSE_IT').collection('certificate');
@@ -54,7 +54,6 @@ async function run() {
     const careerCollection = client.db('UNIVERSE_IT').collection('career');
     const jobApplyCollection = client.db('UNIVERSE_IT').collection('jobApply');
     const popularCategoryCollection = client.db('UNIVERSE_IT').collection('popularCategory');
-
 
 
 
@@ -489,7 +488,7 @@ async function run() {
     // Get comments for a specific blog
     app.get('/comments/blog/:blogId', async (req, res) => {
       const myblogId = req.params.blogId;
-      const query = { blogId:  myblogId, isShow: true}; // assuming blogId is stored as an ObjectId
+      const query = { blogId: myblogId, isShow: true }; // assuming blogId is stored as an ObjectId
       const result = await commentCollection.find(query).toArray();
       res.send(result);
     });
@@ -543,15 +542,13 @@ async function run() {
 
     // 11. User Related api
 
-   
 
     app.post('/register', async (req, res) => {
-      const { name, phone, password } = req.body;
+      const { name, email } = req.body;
 
       const user = {
         name,
-        phone,
-        password
+        email,
       };
 
       const result = await usersCollection.insertOne(user);
@@ -560,26 +557,18 @@ async function run() {
 
     app.post('/login', async (req, res) => {
       const user = req.body;
-      console.log(user.phone);
 
-      const query = { phone: user.phone };
+      const query = { email: user.email };
 
       const existingUser = await usersCollection.findOne(query);
-      console.log(existingUser);
 
       if (existingUser) {
-        if (existingUser.phone == user.phone) {
+        if (existingUser.email == user.email) {
           return res.send({ message: 'login successful', insertedId: 2 });
         }
       } else {
         return res.send('user not found');
       }
-
-
-      
-
-      
-
     })
 
     app.get('/users', async (req, res) => {
@@ -593,6 +582,12 @@ async function run() {
       const result = await usersCollection.findOne(query);
       res.send(result);
     })
+    app.get('/usersByEmail/:email', async (req, res) => {
+      const email = req.params.email;
+      const query = { email };
+      const result = await usersCollection.findOne(query);
+      res.send(result);
+    })
 
     app.delete('/users/:id', async (req, res) => {
       const id = req.params.id;
@@ -600,6 +595,14 @@ async function run() {
       const result = await usersCollection.deleteOne(query);
       res.send(result);
     })
+
+    app.put('/users/role', async (req, res) => {
+      const { id, admin } = req.body;
+      const updatedData = { $set: { admin } };
+      const query = { _id: new ObjectId(id) };
+      const result = await usersCollection.updateOne(query, updatedData);
+      res.send(result);
+    });
 
 
     //11. course category api 
@@ -634,7 +637,7 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const options = { upsert: true };
       const updatedInfo = {
-        $set:{
+        $set: {
           ...data
         }
       }
@@ -724,7 +727,7 @@ async function run() {
       res.send(result);
     })
 
-    
+
     app.delete('/objectives/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -973,7 +976,7 @@ async function run() {
       res.send(result);
     })
 
-   
+
     // confirm a job application 
     app.put('/apply-job/:id', async (req, res) => {
       const id = req.params.id;
