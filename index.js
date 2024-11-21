@@ -16,7 +16,7 @@ app.use(express.json());
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 // const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bpilnp1.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster1.olinusx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1`;
+const uri = `mongodb+srv://universeITmaster:BeAfAku5WAqfVuc5@cluster1.olinusx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -50,10 +50,12 @@ async function run() {
 
     const certificateCollection = client.db('UNIVERSE_IT').collection('certificate');
     const successCollection = client.db('UNIVERSE_IT').collection('success');
+    const feedbackCollection = client.db('UNIVERSE_IT').collection('feedback');
     const teamCollection = client.db('UNIVERSE_IT').collection('team');
     const careerCollection = client.db('UNIVERSE_IT').collection('career');
     const jobApplyCollection = client.db('UNIVERSE_IT').collection('jobApply');
     const popularCategoryCollection = client.db('UNIVERSE_IT').collection('popularCategory');
+    const representativeCollection = client.db('UNIVERSE_IT').collection('representative');
 
 
 
@@ -1037,6 +1039,95 @@ async function run() {
       const result = await popularCategoryCollection.updateOne(query, updatedInfo, options);
       res.send(result);
     })
+
+    // 20. feedback api 
+    app.post('/feedback', async (req, res) => {
+      const data = req.body;
+      const result = await feedbackCollection.insertOne(data);
+      res.send(result);
+    })
+
+    app.get('/feedback', async (req, res) => {
+      const cursor = feedbackCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    })
+
+    app.get('/feedback/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await feedbackCollection.findOne(query);
+      res.send(result);
+    })
+
+    app.put('/feedback/:id', async (req, res) => {
+      const data = req.body;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedInfo = {
+        $set: {
+          ...data
+        }
+      }
+
+      const result = await feedbackCollection.updateOne(query, updatedInfo, options);
+
+      res.send(result);
+    })
+
+
+    app.delete('/feedback/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await feedbackCollection.deleteOne(query);
+      res.send(result);
+    })
+
+    // 21. representative related api
+
+    app.post('/representative', async (req, res) => {
+      const data = req.body;
+      const result = await representativeCollection.insertOne(data);
+      res.send(result);
+    })
+
+    app.get('/representative', async (req, res) => {
+      const result = await representativeCollection.find().toArray();
+      res.send(result);
+    })
+
+    app.get('/representative/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await representativeCollection.findOne(query);
+      res.send(result);
+    })
+
+    app.put('/representative/:id', async (req, res) => {
+      const data = req.body;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedInfo = {
+        $set: {
+          ...data
+        }
+      }
+
+      const result = await representativeCollection.updateOne(query, updatedInfo, options);
+      res.send(result);
+    })
+
+
+    app.delete('/representative/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await representativeCollection.deleteOne(query);
+      res.send(result);
+    })
+
+
 
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
