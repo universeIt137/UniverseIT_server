@@ -56,6 +56,7 @@ async function run() {
     const jobApplyCollection = client.db('UNIVERSE_IT').collection('jobApply');
     const popularCategoryCollection = client.db('UNIVERSE_IT').collection('popularCategory');
     const representativeCollection = client.db('UNIVERSE_IT').collection('representative');
+    const certificateGenerateCollection = client.db('UNIVERSE_IT').collection('certificateGenerate');
 
 
 
@@ -1124,6 +1125,49 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await representativeCollection.deleteOne(query);
+      res.send(result);
+    })
+
+    // 22. certificate generate related api
+
+    app.post('/certificate-generate', async (req, res) => {
+      const data = req.body;
+      const result = await certificateGenerateCollection.insertOne(data);
+      res.send(result);
+    })
+
+    app.get('/certificate-generate', async (req, res) => {
+      const result = await certificateGenerateCollection.find().toArray();
+      res.send(result);
+    })
+
+    app.get('/certificate-generate/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await certificateGenerateCollection.findOne(query);
+      res.send(result);
+    })
+
+    app.put('/certificate-generate/:id', async (req, res) => {
+      const data = req.body;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedInfo = {
+        $set: {
+          ...data
+        }
+      }
+
+      const result = await certificateGenerateCollection.updateOne(query, updatedInfo, options);
+      res.send(result);
+    })
+
+
+    app.delete('/certificate-generate/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await certificateGenerateCollection.deleteOne(query);
       res.send(result);
     })
 
