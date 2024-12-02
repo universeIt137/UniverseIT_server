@@ -11,6 +11,9 @@ const bcrypt = require('bcrypt');
 app.use(cors());
 app.use(express.json());
 
+const QRCode = require('qrcode');
+
+
 
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -166,6 +169,15 @@ async function run() {
       const result = await blogCollection.updateOne(query, updatedInfo, options);
       res.send(result);
     })
+
+
+    app.put('/blog/status', async (req, res) => {
+      const { id, status } = req.body;
+      const updatedData = { $set: { status } };
+      const query = { _id: new ObjectId(id) };
+      const result = await blogCollection.updateOne(query, updatedData);
+      res.send(result);
+    });
 
 
 
@@ -591,7 +603,25 @@ async function run() {
       const result = await usersCollection.findOne(query);
       res.send(result);
     })
-// hello 
+
+    app.put('/users/:id', async (req, res) => {
+      const data = req.body;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedInfo = {
+        $set: {
+          ...data
+        }
+      }
+
+      const result = await usersCollection.updateOne(query, updatedInfo, options);
+      res.send(result);
+
+    })
+
+
+
     app.delete('/users/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -606,6 +636,60 @@ async function run() {
       const result = await usersCollection.updateOne(query, updatedData);
       res.send(result);
     });
+
+
+    // app.put('/users/role/representative', async (req, res) => {
+    //   const { id, representative } = req.body;
+    //   const updatedData = { $set: { representative } };
+    //   const query = { _id: new ObjectId(id) };
+    //   const result = await usersCollection.updateOne(query, updatedData);
+    //   res.send(result);
+    // });
+
+    app.put('/users/role/representative', async (req, res) => {
+      const { id, representative } = req.body;
+
+      try {
+        // Find the user by ID
+        const user = await usersCollection.findOne({ _id: new ObjectId(id) });
+
+        // Check if the user already has a representative_id
+        if (user && user.representative_id) {
+          // If representative_id exists, just update the representative field
+          const updatedData = { $set: { representative } };
+          const query = { _id: new ObjectId(id) };
+          const result = await usersCollection.updateOne(query, updatedData);
+
+          return res.send({ success: true, message: "Representative role updated, ID remains unchanged.", result });
+        }
+
+        // If no representative_id exists, generate a new one
+        const lastRep = await usersCollection
+          .find({ representative_id: { $exists: true } })
+          .sort({ representative_id: -1 })
+          .limit(1)
+          .toArray();
+
+        let newRepId = "REP-001"; // Default ID
+        if (lastRep.length > 0) {
+          const lastId = lastRep[0].representative_id;
+          const idNumber = parseInt(lastId.split('-')[1]);
+          newRepId = `REP-${String(idNumber + 1).padStart(3, '0')}`;
+        }
+
+        // Update the user with the new representative_id
+        const updatedData = { $set: { representative, representative_id: newRepId } };
+        const query = { _id: new ObjectId(id) };
+        const result = await usersCollection.updateOne(query, updatedData);
+
+        res.send({ success: true, message: "Representative role and ID updated.", result });
+
+      } catch (err) {
+        res.status(500).send({ success: false, message: "Error updating user.", error: err.message });
+      }
+    });
+
+
 
 
     //11. course category api 
@@ -1131,7 +1215,14 @@ async function run() {
     // 22. certificate generate related api
 
     app.post('/certificate-generate', async (req, res) => {
-      const data = req.body;
+      const { name, hour, course_category, course_name, student_ID, duration, year, date_of_issue, } = req.body;
+
+
+      const qrImageUrl = await QRCode.toDataURL(`${name} ${hour} ${course_category} ${course_name} ${student_ID} ${duration} ${year} ${date_of_issue}   `);
+
+      const data = {
+        name, hour, course_category, course_name, student_ID, duration, year, date_of_issue, qr_url: qrImageUrl
+      }
       const result = await certificateGenerateCollection.insertOne(data);
       res.send(result);
     })
