@@ -149,6 +149,15 @@ async function run() {
       res.send(result);
     })
 
+
+    app.get('/blogs/:email', async (req, res) => {
+
+      const email = req.params.email;
+      const query = { author_email: email };
+      const result = await blogCollection.find(query).toArray();
+      res.send(result);
+    })
+
     app.delete('/blog/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -561,14 +570,20 @@ async function run() {
     app.post('/register', async (req, res) => {
       const { name, email } = req.body;
 
-      const user = {
-        name,
-        email,
-      };
+      try {
+        const existingUser = await usersCollection.findOne({ email });
+        if (existingUser) {
+          return res.status(400).send({ message: "Email already exists" });
+        }
 
-      const result = await usersCollection.insertOne(user);
-      res.send(result);
-    })
+        const user = { name, email };
+        const result = await usersCollection.insertOne(user);
+        res.status(201).send(result);
+      } catch (error) {
+        res.status(500).send({ message: "An error occurred", error });
+      }
+    });
+
 
     app.post('/login', async (req, res) => {
       const user = req.body;
@@ -629,13 +644,26 @@ async function run() {
       res.send(result);
     })
 
-    app.put('/users/role', async (req, res) => {
+    // depreciated this api
+    // app.put('/users/role', async (req, res) => {
+    //   const { id, admin } = req.body;
+    //   console.log("from server", id, admin);
+    //   const updatedData = { $set: { admin } };
+    //   const query = { _id: new ObjectId(id) };
+    //   const result = await usersCollection.updateOne(query, updatedData);
+    //   res.send(result);
+    // });
+    // this api
+
+    app.put('/users/role/admin', async (req, res) => {
       const { id, admin } = req.body;
+      // console.log(id, admin);
       const updatedData = { $set: { admin } };
       const query = { _id: new ObjectId(id) };
+      // console.log(query);
       const result = await usersCollection.updateOne(query, updatedData);
       res.send(result);
-    });
+    })
 
 
     // app.put('/users/role/representative', async (req, res) => {
@@ -688,6 +716,52 @@ async function run() {
         res.status(500).send({ success: false, message: "Error updating user.", error: err.message });
       }
     });
+
+
+
+    app.post('/users/role/representative', async (req, res) => {
+      const {
+        name,
+        phone,
+        email,
+        institute,
+        division,
+        district,
+        ImageUrl,
+        semester,
+      } = req.body;
+      const data = req.body;
+
+      try {
+        // Check if the email already exists
+        const existingUser = await usersCollection.findOne({ email });
+
+
+        if (existingUser) {
+          return res.status(400).send({
+            success: false,
+            message: 'A user with this email already exists.',
+          });
+        }
+
+
+        // Insert the new user into the database
+        const result = await usersCollection.insertOne(data);
+
+        res.send({
+          success: true,
+          message: 'New representative user created successfully.',
+          result,
+        });
+      } catch (err) {
+        res.status(500).send({
+          success: false,
+          message: 'Error creating user.',
+          error: err.message,
+        });
+      }
+    });
+
 
 
 
