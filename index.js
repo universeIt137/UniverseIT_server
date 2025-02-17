@@ -1344,18 +1344,26 @@ async function run() {
 
     // vidoe upload api
 
+    // app.post("/video-upload", async (req, res) => {
+    //   const reqBody = req.body;
+    //   const data = await videoCollection.insertOne(reqBody);
+    //   res.send(data);
+    // });  
+
+    // // all video find api
+
+    // app.get("/all-video", async (req, res) => {
+    //   const data = await videoCollection.find().toArray();
+    //   res.send(data);
+    // });
+    
+
     app.post("/video-upload", async (req, res) => {
       const reqBody = req.body;
-      const data = await videoCollection.insertOne(reqBody);
+      let data = await videoCollection.insertOne(reqBody);
       res.send(data);
-    });  
+    });
 
-    // all video find api
-
-    app.get("/all-video", async (req, res) => {
-      const data = await videoCollection.find().toArray();
-      res.send(data);
-    })
 
 
 
