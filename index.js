@@ -61,6 +61,8 @@ async function run() {
     const representativeCollection = client.db('UNIVERSE_IT').collection('representative');
     const certificateGenerateCollection = client.db('UNIVERSE_IT').collection('certificateGenerate');
 
+    const videoCollection = client.db('UNIVERSE_IT').collection('video');
+
 
 
     //1. seminar api
@@ -1334,6 +1336,16 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await certificateGenerateCollection.deleteOne(query);
       res.send(result);
+    });
+
+
+    // video related api
+
+
+    app.post("/video-upload", async (req, res) => {
+      const reqBody = req.body;
+      const data = await videoCollection.insertOne(reqBody);
+      res.send(data);
     })
 
 
