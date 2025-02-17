@@ -1360,9 +1360,9 @@ async function run() {
 
     app.post("/video-upload", async (req, res) => {
       const reqBody = req.body;
-      let data = await videoCollection.insertOne(reqBody);
+      const data = await videoCollection.insertOne(reqBody);
       res.send(data);
-    });
+    })
 
 
 
