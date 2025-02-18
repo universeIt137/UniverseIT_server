@@ -1362,6 +1362,11 @@ async function run() {
       const reqBody = req.body;
       const data = await videoCollection.insertOne(reqBody);
       res.send(data);
+    });
+
+    app.get("/all-video", async (req, res) => {
+      let data = await videoCollection.find().toArray();
+      res.json(data)
     })
 
 
