@@ -1356,7 +1356,7 @@ async function run() {
     //   const data = await videoCollection.find().toArray();
     //   res.send(data);
     // });
-    
+
 
     app.post("/video-upload", async (req, res) => {
       const reqBody = req.body;
@@ -1367,7 +1367,44 @@ async function run() {
     app.get("/all-video", async (req, res) => {
       let data = await videoCollection.find().toArray();
       res.json(data)
-    })
+    });
+
+    app.get("/single-video/:id", async (req, res) => {
+      let id = req.params.id;
+      const filter = {
+        _id: new ObjectId(id)
+      };
+      const data = await videoCollection.findOne(filter);
+      res.send(data)
+    });
+
+
+    app.put("/video-update/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = {
+        _id: new ObjectId(id)
+      };
+      const data = req.body;
+      const options = { upsert: true };
+      const updatedInfo = {
+        $set: {
+          ...data
+        }
+      }
+
+      const result = await videoCollection.updateOne(filter, updatedInfo, options);
+      res.send(result);
+    });
+
+
+    app.delete("/video-delete/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = {
+        _id: new ObjectId(id)
+      };
+      const data = await videoCollection.deleteOne(filter);
+      res.send(data)
+    });
 
 
 
