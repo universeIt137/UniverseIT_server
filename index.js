@@ -7,8 +7,12 @@ const bcrypt = require('bcrypt');
 
 
 // middleware
-
-app.use(cors());
+app.use(cors({
+  origin: ["https://universeitinstitute.com","https://www.universeitinstitute.com"], // your frontend domain
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
 app.use(express.json());
 
 const QRCode = require('qrcode');
