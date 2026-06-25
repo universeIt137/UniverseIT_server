@@ -1,0 +1,51 @@
+const express = require("express");
+const router = express.Router();
+const { ObjectId } = require("mongodb");
+const { getCollection } = require("../config/db");
+
+const popularCategoryCollection = getCollection("popularCategory");
+
+router.post("/popular-category", async (req, res) => {
+  const data = req.body;
+  const result = await popularCategoryCollection.insertOne(data);
+  res.send(result);
+});
+
+router.get("/popular-category", async (req, res) => {
+  const result = await popularCategoryCollection.find().toArray();
+  res.send(result);
+});
+
+router.get("/popular-category/:id", async (req, res) => {
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id) };
+  const result = await popularCategoryCollection.findOne(query);
+  res.send(result);
+});
+
+router.delete("/popular-category/:id", async (req, res) => {
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id) };
+  const result = await popularCategoryCollection.deleteOne(query);
+  res.send(result);
+});
+
+router.put("/popular-category/:id", async (req, res) => {
+  const data = req.body;
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id) };
+  const options = { upsert: true };
+  const updatedInfo = {
+    $set: {
+      ...data,
+    },
+  };
+  const result = await popularCategoryCollection.updateOne(
+    query,
+    updatedInfo,
+    options,
+  );
+  res.send(result);
+});
+
+module.exports = router;
